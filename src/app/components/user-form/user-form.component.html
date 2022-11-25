@@ -9,17 +9,12 @@
           <mat-error *ngIf="userForm.get('email')!.invalid">email is invalid</mat-error>
         </mat-form-field>
       </div>
-      <mat-form-field appearance="fill">
-        <mat-label>Role</mat-label>
-        <mat-select placeholder="Role" formControlName="role" required>
-          <mat-option *ngFor="let item of roles$ | async" [value]="item.id">
-            {{item.role}}
-          </mat-option>
-        </mat-select>
-      </mat-form-field>
       <div>
-
+        <mat-radio-group aria-label="Select an option" formControlName="role" required>
+          <mat-radio-button *ngFor="let item of roles$ | async" [value]="item.id">{{item.role}}</mat-radio-button>
+        </mat-radio-group>
       </div>
+      <br>
       <div>
         <button type="submit" mat-raised-button color="primary" [disabled]="userForm.invalid">Submit</button>
       </div>
