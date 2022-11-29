@@ -1,7 +1,7 @@
 import {ChangeDetectionStrategy, Component, ViewEncapsulation} from '@angular/core';
 import {FormControl, FormGroup} from '@angular/forms';
-import {map, Observable, of} from 'rxjs';
-import {filter} from 'rxjs/operators';
+import {map, Observable} from 'rxjs';
+import {tap} from 'rxjs/operators';
 import {JobTagsModel} from '../../models/job-tags.model';
 import {JobsService} from '../../services/jobs.service';
 
@@ -17,30 +17,38 @@ export class JobPostComponent {
     title: new FormControl(),
     description: new FormControl(),
   });
-  readonly jobTags$: Observable<JobTagsModel[]> = this._jobsService.getAllTags();
+  readonly jobTagsForm: FormGroup = new FormGroup({});
+  readonly jobTags$: Observable<JobTagsModel[]> = this._jobsService.getAllTags().pipe(tap(data => this.setJobTagForm(data)));
 
 
   public selectedItem: string[] = [];
+
   constructor(private _jobsService: JobsService) {
   }
 
-  onJobFormSubmitted(jobForm: FormGroup): void {
+  onJobFormSubmitted(jobForm: FormGroup, tagsForm: FormGroup, tags: JobTagsModel[]): void {
+    console.log("title: " + jobForm.get('title')?.value);
+    console.log("description" + jobForm.get('description')?.value);
+    console.log("selected tags:");
+    for (let i = 0; i < tags.length; i++) {
+      if (tagsForm.get(tags[i].name)?.value) {
+        console.log(tags[i].id);
+      }
+    }
     this._jobsService.createJobPost({
       title: jobForm.get('title')?.value,
       description: jobForm.get('description')?.value,
-      jobTagIds: this.selectedItem
+      jobTagIds: tags.filter(data => tagsForm.get(data.name)?.value).map((data) => {
+        return data.id
+      })
     }).subscribe();
+
 
   }
 
-  tagChanged(e: any, tag: string): void {
-    if (e.checked) {
-      console.log(tag + 'checked');
-      this.selectedItem.push(tag);
-      console.log(this.selectedItem)
-    } else {
-      this.selectedItem = this.selectedItem.filter(data => data != tag);
-      console.log(this.selectedItem)
+  setJobTagForm(tags: JobTagsModel[]): void {
+    for (let i = 0; i < tags.length; i++) {
+      this.jobTagsForm.addControl(tags[i].name, new FormControl(false))
     }
   }
 }

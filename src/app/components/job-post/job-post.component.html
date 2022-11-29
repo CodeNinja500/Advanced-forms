@@ -1,7 +1,7 @@
 <mat-card>
   <mat-card-title>New Job Post</mat-card-title>
   <mat-card-content>
-    <form [formGroup]="jobForm" (ngSubmit)="onJobFormSubmitted(jobForm)">
+    <form [formGroup]="jobForm">
       <div>
         <mat-form-field appearance="fill">
           <mat-label>Title</mat-label>
@@ -18,14 +18,21 @@
 
       </div>
       <div>
-        <section>
-          <mat-checkbox style="margin-left: 1rem" *ngFor="let item of jobTags$ | async" [value]="item.id"
-                        (change)="tagChanged($event,item.id)">{{item.name}}</mat-checkbox>
-        </section>
+        <form [formGroup]="jobTagsForm" *ngIf="jobTags$|async as tags"
+              (ngSubmit)="onJobFormSubmitted(jobForm, jobTagsForm, tags)">
+          <section>
+            <ng-container *ngFor="let tag of tags">
+              <mat-checkbox [formControlName]="tag.name" [value]="tag.id">{{tag.name}}</mat-checkbox>
+            </ng-container>
+          </section>
+          <div>
+            <button type="submit" mat-raised-button color="primary">Submit</button>
+          </div>
+        </form>
       </div>
-      <div>
-        <button type="submit" mat-raised-button color="primary">Submit</button>
-      </div>
+
+
     </form>
   </mat-card-content>
 </mat-card>
+
